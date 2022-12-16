@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:learningdart/views/login.dart';
-import 'package:learningdart/views/register.dart';
+import 'package:learningdart/routes.dart';
+import 'package:learningdart/views/verify_email.dart';
 import 'firebase_options.dart';
 
 void main() {
@@ -20,6 +20,7 @@ class MyApp2 extends StatelessWidget {
       title: 'Flutter Demo by amal ',
       theme: ThemeData(),
       home: const HomePage(),
+      routes: registeredRoutes(context),
     );
   }
 }
@@ -29,37 +30,56 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
-      body: FutureBuilder(
-        future: initializeFirebase(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              final user = FirebaseAuth.instance.currentUser;
-              if (user?.emailVerified ?? false) {
-                if (kDebugMode) {
-                  print('user email is verified');
-                }
-              } else {
-                if (kDebugMode) {
-                  print('user email is not verified');
-                }
+    initializeFirebase().then(
+      (success) {
+        if (success) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            if (user.emailVerified) {
+              if (kDebugMode) {
+                print('user email is verified');
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login/', (route) => false);
               }
-              return const Text('Firebase initialized');
-            default:
-              return const Text('Loading');
+            } else {
+              if (kDebugMode) {
+                print('user email is not verified');
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const VerifyEmailView(),
+                  ),
+                );
+              }
+            }
+          } else {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/login/', (route) => false);
           }
-        },
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Home Page'),
+            ),
+            body: const CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+    return const Center(
+      child: CircularProgressIndicator(
+        color: Colors.red,
       ),
     );
   }
 
-  Future<FirebaseApp> initializeFirebase() {
-    return Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  Future<bool> initializeFirebase() async {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
