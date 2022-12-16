@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "549261373635",
+    "project_id": "flutter-proj-amal",
+    "storage_bucket": "flutter-proj-amal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549261373635:android:349d2b08fb4605c20f7276",
+        "android_client_info": {
+          "package_name": "com.example.learningdart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549261373635-p869umid85cfmhqj056rtocvt4tg3orc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ3kSJtvNUTnSsY53HsqC-s4kw77GA_3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549261373635-p869umid85cfmhqj056rtocvt4tg3orc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "549261373635-ipp4l0dig30o1kv1ot9joieequkktrbt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.learningdart"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
