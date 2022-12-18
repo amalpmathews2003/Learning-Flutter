@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/views/login.dart';
 import '../firebase_options.dart';
 
@@ -54,6 +55,9 @@ class RegisterViewState extends State<RegisterView> {
         print('User registered successfully');
         print(userCredential);
       }
+      if (!mounted) return;
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(noteRoute, (route) => false);
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
         switch (e.code) {
@@ -101,7 +105,7 @@ class RegisterViewState extends State<RegisterView> {
           TextButton(
             onPressed: () {
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/login/', (route) => false);
+                  .pushNamedAndRemoveUntil(loginRoute, (route) => false);
             },
             child: const Text('Login View'),
           )

@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-enum MenuAction { logout }
+import 'package:learningdart/constants/routes.dart';
 
 class NoteView extends StatefulWidget {
   const NoteView({super.key});
@@ -17,35 +16,46 @@ class _NoteViewState extends State<NoteView> {
       appBar: AppBar(
         title: const Text('Notes'),
         actions: [
-          PopupMenuButton<MenuAction>(
-            onSelected: ((MenuAction value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogout = await showLogoutDialogue(context);
-                  if (shouldLogout) {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login/', (route) => false);
-                  }
-                  break;
-                default:
-                  break;
-              }
-            }),
-            itemBuilder: (context) {
-              return const [
-                PopupMenuItem(
-                  value: MenuAction.logout,
-                  child: Text('Log out'),
-                ),
-              ];
-            },
-          )
+          popupMenu(context, mounted),
         ],
       ),
-      body: null,
+      body: const Center(
+        child: null,
+      ),
     );
   }
+}
+
+enum MenuAction { logout }
+
+Widget popupMenu(BuildContext context, bool mounted) {
+  void handleSelect(MenuAction value) async {
+    switch (value) {
+      case MenuAction.logout:
+        final shouldLogout = await showLogoutDialogue(context);
+        if (shouldLogout) {
+          await FirebaseAuth.instance.signOut();
+          if (!mounted) return;
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  return PopupMenuButton<MenuAction>(
+    onSelected: handleSelect,
+    itemBuilder: (context) {
+      return const [
+        PopupMenuItem(
+          value: MenuAction.logout,
+          child: Text('Log out'),
+        ),
+      ];
+    },
+  );
 }
 
 Future<bool> showLogoutDialogue(BuildContext context) {

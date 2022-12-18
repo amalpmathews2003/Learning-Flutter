@@ -4,12 +4,16 @@ import 'package:learningdart/views/login.dart';
 import 'package:learningdart/views/notes.dart';
 import 'package:learningdart/views/register.dart';
 
+const loginRoute = '/login/';
+const registerRoute = '/register/';
+const noteRoute = '/notes/';
+
 Map<String, Widget Function(BuildContext)> registeredRoutes(
     BuildContext context) {
   return {
-    '/login/': (context) => const LoginView(),
-    '/register/': (context) => const RegisterView(),
-    '/note/': (context) => const NoteView(),
-    'OAuth': (context) => GoogleAuth(),
+    loginRoute: (context) => const LoginView(),
+    registerRoute: (context) => const RegisterView(),
+    noteRoute: (context) => const NoteView(),
+    '/OAuth/': (context) => GoogleAuth(),
   };
 }

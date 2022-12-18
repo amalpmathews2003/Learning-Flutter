@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:learningdart/routes.dart';
+import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/views/verify_email.dart';
 import 'firebase_options.dart';
 
@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
                 print('user email is verified');
               }
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/note/', (route) => false);
+                  .pushNamedAndRemoveUntil(noteRoute, (route) => false);
             } else {
               if (kDebugMode) {
                 print('user email is not verified');
@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
             }
           } else {
             Navigator.of(context)
-                .pushNamedAndRemoveUntil('/login/', (route) => false);
+                .pushNamedAndRemoveUntil(loginRoute, (route) => false);
           }
         } else {
           return Scaffold(
