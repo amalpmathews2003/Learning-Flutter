@@ -21,6 +21,7 @@ class MyApp2 extends StatelessWidget {
       theme: ThemeData(),
       home: const HomePage(),
       routes: registeredRoutes(context),
+      darkTheme: ThemeData.dark(useMaterial3: true),
     );
   }
 }
@@ -38,18 +39,18 @@ class HomePage extends StatelessWidget {
             if (user.emailVerified) {
               if (kDebugMode) {
                 print('user email is verified');
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/login/', (route) => false);
               }
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/note/', (route) => false);
             } else {
               if (kDebugMode) {
                 print('user email is not verified');
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const VerifyEmailView(),
-                  ),
-                );
               }
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const VerifyEmailView(),
+                ),
+              );
             }
           } else {
             Navigator.of(context)

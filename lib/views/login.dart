@@ -51,6 +51,7 @@ class LoginViewState extends State<LoginView> {
         print('used logged in successfully');
         print(userCredential);
       }
+      Navigator.of(context).pushNamedAndRemoveUntil('/note/', (route) => false);
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
         switch (e.code) {
