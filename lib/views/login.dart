@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:learningdart/constants/routes.dart';
+import 'package:learningdart/widgets/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -28,51 +29,31 @@ class LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  bool checkCredentials(String email, String password) {
-    return email.isNotEmpty &&
-        password.isNotEmpty &&
-        password.length > 8 &&
-        email.contains('@') &&
-        email.contains('.');
-  }
-
   void handleButtonClick() async {
     final email = _email.text;
+
     final password = _password.text;
-    if (!checkCredentials(email, password)) {
-      if (kDebugMode) {
-        print('credentials aren\'t verified');
-      }
-      return;
-    }
+
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      if (kDebugMode) {
-        print('used logged in successfully');
-        print(userCredential);
-      }
+
       if (!mounted) return;
       Navigator.of(context)
           .pushNamedAndRemoveUntil(noteRoute, (route) => false);
     } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        switch (e.code) {
-          case 'user-note-found':
-            print('user not found');
-            break;
-          case 'wrong-password':
-            print('wrong password');
-            break;
-          default:
-            print('unknown auth exception ocurred');
-        }
-        print(e.code);
+      switch (e.code) {
+        case 'user-not-found':
+          await showErrorDialog(context, 'User not found');
+          break;
+        case 'wrong-password':
+          await showErrorDialog(context, 'Wrong credentials');
+          break;
+        default:
+          await showErrorDialog(context, 'Error : ${e.code}');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('unknown error occurred');
-      }
+      log('unknown error occurred', name: 'login', error: e.toString());
     }
   }
 

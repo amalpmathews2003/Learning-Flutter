@@ -1,28 +1,18 @@
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class VerifyEmailView extends StatefulWidget {
-  const VerifyEmailView({super.key});
+class VerifyEmailView extends StatelessWidget {
+  VerifyEmailView({super.key});
 
-  @override
-  State<VerifyEmailView> createState() => _VerifyEmailViewState();
-}
-
-class _VerifyEmailViewState extends State<VerifyEmailView> {
   final user = FirebaseAuth.instance.currentUser;
+
   void sendVerificationEmail() async {
     try {
-      print('${user?.email} ${user?.emailVerified}');
-      
       await user?.sendEmailVerification();
-      if (kDebugMode) {
-        print('verification email send successfully');
-      }
+      log('verification email send successfully');
     } on Exception catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      log(e.toString());
     }
   }
 
@@ -34,7 +24,10 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
       ),
       body: Column(
         children: [
-          const Text('Please verify your email'),
+          const Text(
+              'We\'ve sent you an email verification. Please open it to verify your account'),
+          const Text(
+              'If you haven\'t received a verification email yet, Please press the button below'),
           Text('${user?.email}'),
           TextButton(
             onPressed: sendVerificationEmail,

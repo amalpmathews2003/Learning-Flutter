@@ -1,9 +1,8 @@
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
-import 'package:learningdart/views/verify_email.dart';
 import 'firebase_options.dart';
 
 void main() {
@@ -30,27 +29,21 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, [bool mounted = true]) {
     initializeFirebase().then(
-      (success) {
+      (success) async {
         if (success) {
           final user = FirebaseAuth.instance.currentUser;
           if (user != null) {
             if (user.emailVerified) {
-              if (kDebugMode) {
-                print('user email is verified');
-              }
+              log('user email is verified');
               Navigator.of(context)
                   .pushNamedAndRemoveUntil(noteRoute, (route) => false);
             } else {
-              if (kDebugMode) {
-                print('user email is not verified');
-              }
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const VerifyEmailView(),
-                ),
-              );
+              log('user email is not verified');
+              await user.sendEmailVerification();
+              if (!mounted) return null;
+              Navigator.of(context).pushNamed('/verified-route/');
             }
           } else {
             Navigator.of(context)

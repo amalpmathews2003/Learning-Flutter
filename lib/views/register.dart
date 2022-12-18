@@ -1,10 +1,8 @@
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
-import 'package:learningdart/views/login.dart';
-import '../firebase_options.dart';
+import 'package:learningdart/widgets/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -31,48 +29,32 @@ class RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-  bool checkCredentials(String email, String password) {
-    return email.isNotEmpty &&
-        password.isNotEmpty &&
-        password.length > 8 &&
-        email.contains('@') &&
-        email.contains('.');
-  }
-
   void handleButtonClick() async {
     final email = _email.text;
     final password = _password.text;
-    if (!checkCredentials(email, password)) {
-      if (kDebugMode) {
-        print('credentials aren\'t verified');
-      }
-      return;
-    }
     try {
-      final userCredential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      if (kDebugMode) {
-        print('User registered successfully');
-        print(userCredential);
-      }
+      await FirebaseAuth.instance.currentUser?.sendEmailVerification();
       if (!mounted) return;
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(noteRoute, (route) => false);
+      Navigator.of(context).pushNamed(verifyEmailRoute);
     } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        switch (e.code) {
-          case 'email-already-in-us':
-            print('email already registered');
-            break;
-          default:
-            print('unknown auth exception ocurred');
-        }
-        print(e.code);
+      switch (e.code) {
+        case 'email-already-in-use':
+          await showErrorDialog(context, 'Email is already registered');
+          break;
+        case 'weak-password':
+          await showErrorDialog(context, 'Weak password');
+          break;
+        case 'invalid-email':
+          await showErrorDialog(context, 'Invalid email');
+          break;
+        default:
+          await showErrorDialog(context, 'Error Code:${e.code}');
       }
+      log(e.code);
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      log('unknown error occurred', name: 'register', error: e.toString());
     }
   }
 
