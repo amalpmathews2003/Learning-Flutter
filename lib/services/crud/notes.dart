@@ -1,4 +1,5 @@
 import 'dart:async' show StreamController;
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:learningdart/services/crud/exceptions.dart';
 import 'package:sqflite/sqflite.dart' show openDatabase, Database;
@@ -11,14 +12,19 @@ class NoteService {
 
   List<DatabaseNote> _notes = [];
 
-  final _noteStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _noteStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _noteStreamController.stream;
 
   static final NoteService _shared = NoteService._sharedInstance();
 
-  NoteService._sharedInstance();
+  NoteService._sharedInstance() {
+    _noteStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _noteStreamController.sink.add(_notes);
+      },
+    );
+  }
 
   factory NoteService() => _shared;
 
@@ -110,7 +116,9 @@ class NoteService {
     if (results.isNotEmpty) throw UserAlreadyExists();
     final userId = await db.insert(
       userTable,
-      {email: email},
+      {
+        emailColumn: email,
+      },
     );
     return DatabaseUser(id: userId, email: email);
   }
@@ -124,7 +132,6 @@ class NoteService {
       where: 'email = ?',
       whereArgs: [email.toLowerCase()],
     );
-
     if (results.isEmpty) throw CouldNotFindUser();
     return DatabaseUser.fromRow(results.first);
   }
@@ -197,7 +204,6 @@ class NoteService {
     final notes = await db.query(
       noteTable,
     );
-    if (notes.isEmpty) throw CouldNotFindNotes();
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
   }
 
@@ -207,13 +213,11 @@ class NoteService {
   }) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-
     await getNote(id: id);
-
     final updatedCount = await db.update(
       noteTable,
       {
-        text: text,
+        textColumn: text,
       },
       where: 'id = ?',
       whereArgs: [id],
