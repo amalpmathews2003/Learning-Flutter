@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/services/auth/service.dart';
 import 'package:learningdart/services/crud/notes.dart';
+import 'package:learningdart/widgets/note_list.dart';
 import 'package:learningdart/widgets/popmenu.dart' show popupMenu;
 
 class NoteView extends StatefulWidget {
@@ -49,18 +50,11 @@ class _NoteViewState extends State<NoteView> {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
                         final allNotes = snapshot.data!;
-                        return ListView.builder(
-                          itemCount: allNotes.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(
-                                allNotes[index].text,
-                                maxLines: 1,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          },
+                        return NotesList(
+                          notes: allNotes,
+                          onDeleteNote: ((note) async {
+                            await _noteService.deleteNote(id: note.id);
+                          }),
                         );
                       } else {
                         return const CircularProgressIndicator();

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
+import 'package:learningdart/widgets/generic_dialog.dart';
 
 enum MenuAction { logout }
 
@@ -35,27 +36,12 @@ Widget popupMenu(BuildContext context, bool mounted) {
 }
 
 Future<bool> showLogoutDialogue(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Are your sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Sign out'),
-          ),
-        ],
-      );
-    },
-  ).then((value) => value ?? false);
+  return showGenericDialog<bool>(
+      context: context,
+      title: 'Log out',
+      content: 'Are you sure you want to log out?',
+      optionsBuilder: () => {
+            'Cancel': false,
+            'Log out': true,
+          }).then((value) => value ?? false);
 }
