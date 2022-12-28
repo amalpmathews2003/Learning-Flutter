@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:learningdart/services/auth/service.dart';
 import 'package:learningdart/services/crud/notes.dart';
-import 'dart:developer';
+import 'package:learningdart/utilities/get_arguments.dart';
 
-class NewNoteView extends StatefulWidget {
-  const NewNoteView({super.key});
+class CreateUpdateNoteView extends StatefulWidget {
+  const CreateUpdateNoteView({super.key});
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  State<CreateUpdateNoteView> createState() => _CreateUpdateNoteViewState();
 }
 
-class _NewNoteViewState extends State<NewNoteView> {
+class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   DatabaseNote? _note;
   late final NoteService _noteService;
   late final TextEditingController _textController;
@@ -55,13 +55,20 @@ class _NewNoteViewState extends State<NewNoteView> {
     await _noteService.updateNote(id: note!.id, text: text);
   }
 
-  Future<DatabaseNote> createNewNote() async {
+  Future<DatabaseNote> createOrGetExistingNote(BuildContext context) async {
+    final widgetNote = context.getArgument<DatabaseNote>();
+    if (widgetNote != null) {
+      _note = widgetNote;
+      _textController.text = widgetNote.text;
+      return widgetNote;
+    }
     final existingNote = _note;
     if (existingNote != null) return existingNote;
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _noteService.getUser(email: email);
     final newNote = await _noteService.createNote(owner: owner);
+    _note = newNote;
     return newNote;
   }
 
@@ -72,10 +79,10 @@ class _NewNoteViewState extends State<NewNoteView> {
         title: const Text('New Note'),
       ),
       body: FutureBuilder(
+        future: createOrGetExistingNote(context),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              _note = snapshot.data;
               _setUpTextContollerListener();
               return Center(
                 child: TextField(
@@ -91,7 +98,6 @@ class _NewNoteViewState extends State<NewNoteView> {
               return const CircularProgressIndicator();
           }
         },
-        future: createNewNote(),
       ),
     );
   }

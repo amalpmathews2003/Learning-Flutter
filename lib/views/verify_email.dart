@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -10,10 +9,7 @@ class VerifyEmailView extends StatelessWidget {
   void sendVerificationEmail() async {
     try {
       await user?.sendEmailVerification();
-      log('verification email send successfully');
-    } on Exception catch (e) {
-      log(e.toString());
-    }
+    } on Exception catch (e) {}
   }
 
   @override

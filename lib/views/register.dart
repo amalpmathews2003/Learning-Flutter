@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
@@ -52,9 +51,6 @@ class RegisterViewState extends State<RegisterView> {
         default:
           await showErrorDialog(context, 'Error Code:${e.code}');
       }
-      log(e.code);
-    } catch (e) {
-      log('unknown error occurred', name: 'register', error: e.toString());
     }
   }
 

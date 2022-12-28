@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/services/auth/service.dart';
@@ -34,11 +33,9 @@ class HomePage extends StatelessWidget {
           final user = AuthService.firebase().currentUser;
           if (user != null) {
             if (user.isEmailVerified) {
-              log('user email is verified');
               Navigator.of(context)
                   .pushNamedAndRemoveUntil(noteRoute, (route) => false);
             } else {
-              log('user email is not verified');
               await AuthService.firebase().sendEmailVerification();
               if (!mounted) return null;
               Navigator.of(context).pushNamed('/verified-route/');
