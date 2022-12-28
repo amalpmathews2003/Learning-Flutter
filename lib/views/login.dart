@@ -1,7 +1,7 @@
-import 'dart:developer' show log;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:learningdart/constants/routes.dart';
+import 'package:learningdart/services/auth/exceptions.dart';
+import 'package:learningdart/services/auth/service.dart';
 import 'package:learningdart/widgets/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -35,26 +35,16 @@ class LoginViewState extends State<LoginView> {
     final password = _password.text;
 
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-
-      if (!mounted) return;
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(noteRoute, (route) => false);
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'user-not-found':
-          await showErrorDialog(context, 'User not found');
-          break;
-        case 'wrong-password':
-          await showErrorDialog(context, 'Wrong credentials');
-          break;
-        default:
-          await showErrorDialog(context, 'Error : ${e.code}');
-      }
-    } catch (e) {
-      log('unknown error occurred', name: 'login', error: e.toString());
+      await AuthService.firebase().login(email: email, password: password);
+    } on UserNotFoundAuthException {
+      await showErrorDialog(context, 'User Not Found');
+    } on WrongPasswordAuthException {
+      await showErrorDialog(context, 'Wrong Password');
+    } on GenericAuthException {
+      await showErrorDialog(context, 'Unknown Error');
     }
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil(noteRoute, (route) => false);
   }
 
   @override

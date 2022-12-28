@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../constants/routes.dart';
+import 'package:learningdart/constants/routes.dart';
 
 enum MenuAction { logout }
 
@@ -14,7 +13,7 @@ Widget popupMenu(BuildContext context, bool mounted) {
           await FirebaseAuth.instance.signOut();
           if (!mounted) return;
           Navigator.of(context)
-              .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+              .pushNamedAndRemoveUntil(loginRoute, (_) => false);
         }
         break;
       default:

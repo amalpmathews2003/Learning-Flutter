@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
+import 'package:learningdart/services/auth/service.dart';
 import 'package:learningdart/widgets/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -33,9 +34,8 @@ class RegisterViewState extends State<RegisterView> {
     final email = _email.text;
     final password = _password.text;
     try {
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+      await AuthService.firebase().createUser(email: email, password: password);
+      await AuthService.firebase().sendEmailVerification();
       if (!mounted) return;
       Navigator.of(context).pushNamed(verifyEmailRoute);
     } on FirebaseAuthException catch (e) {
