@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/services/auth/service.dart';
 import 'package:learningdart/services/crud/notes.dart';
 import 'package:learningdart/widgets/popmenu.dart' show popupMenu;
@@ -29,8 +30,13 @@ class _NoteViewState extends State<NoteView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notes'),
+        title: const Text('Your Notes'),
         actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(newNoteRoute);
+              },
+              icon: const Icon(Icons.add)),
           popupMenu(context, mounted),
         ],
       ),
