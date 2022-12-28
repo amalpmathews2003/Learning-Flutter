@@ -1,5 +1,4 @@
 import 'dart:async' show StreamController;
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:learningdart/services/crud/exceptions.dart';
 import 'package:sqflite/sqflite.dart' show openDatabase, Database;
@@ -9,6 +8,7 @@ import 'package:path_provider/path_provider.dart'
 
 class NoteService {
   Database? _db;
+  DatabaseUser? _user;
 
   List<DatabaseNote> _notes = [];
 
@@ -31,9 +31,11 @@ class NoteService {
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
     try {
       final user = await getUser(email: email);
+      _user = user;
       return user;
     } on CouldNotFindUser {
       final createdUser = await createUser(email: email);
+      _user = createdUser;
       return createdUser;
     } catch (e) {
       rethrow;
@@ -41,7 +43,9 @@ class NoteService {
   }
 
   Future<void> _cacheNotes() async {
-    final notes = await getAllnotes();
+    final user = _user;
+    if (user == null) throw UserShouldBeSetBeforeReadingAllNotes();
+    final notes = await getAllnotes(user: user);
     _notes = notes.toList();
     _noteStreamController.add(_notes);
   }
@@ -197,11 +201,15 @@ class NoteService {
     return note;
   }
 
-  Future<Iterable<DatabaseNote>> getAllnotes() async {
+  Future<Iterable<DatabaseNote>> getAllnotes({
+    required DatabaseUser user,
+  }) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
       noteTable,
+      where: 'user_id = ?',
+      whereArgs: [user.id],
     );
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
   }
