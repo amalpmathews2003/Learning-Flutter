@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart' show openDatabase, Database;
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
+import 'dart:developer' show log;
 
 class NoteService {
   Database? _db;
@@ -143,20 +144,18 @@ class NoteService {
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-
     final dbUser = await getUser(email: owner.email);
     if (dbUser != owner) throw CouldNotFindUser();
-
     const text = '';
+    final updatedAt = DateTime.now();
+
     final noteId = await db.insert(noteTable, {
       userIdColumn: dbUser.id,
       textColumn: text,
+      updatedAtColumn: updatedAt.toString(),
     });
     final note = DatabaseNote(
-      id: noteId,
-      userId: owner.id,
-      text: text,
-    );
+        id: noteId, userId: owner.id, text: text, updatedAt: updatedAt);
     _notes.add(note);
     _noteStreamController.add(_notes);
     return note;
@@ -205,13 +204,18 @@ class NoteService {
     required DatabaseUser user,
   }) async {
     await _ensureDbIsOpen();
+
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
       noteTable,
       where: 'user_id = ?',
       whereArgs: [user.id],
     );
-    return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
+
+    final userNotes =
+        notes.map((noteRow) => DatabaseNote.fromRow(noteRow)).toList();
+
+    return userNotes;
   }
 
   Future<DatabaseNote> updateNote({
@@ -225,6 +229,7 @@ class NoteService {
       noteTable,
       {
         textColumn: text,
+        updatedAtColumn: DateTime.now().toString(),
       },
       where: 'id = ?',
       whereArgs: [id],
@@ -263,16 +268,18 @@ class DatabaseNote {
   final int id;
   final int userId;
   final String text;
-
+  final DateTime updatedAt;
   const DatabaseNote({
     required this.id,
     required this.userId,
     required this.text,
+    required this.updatedAt,
   });
   DatabaseNote.fromRow(Map<String, Object?> map)
       : id = map[idColumn] as int,
         userId = map[userIdColumn] as int,
-        text = map[textColumn] as String;
+        text = map[textColumn] as String,
+        updatedAt = DateTime.parse('${map[updatedAtColumn]}');
 
   @override
   String toString() => 'Note, Id=$id, userId=$userId';
@@ -291,6 +298,7 @@ const idColumn = "id";
 const emailColumn = "email";
 const userIdColumn = "user_id";
 const textColumn = "text";
+const updatedAtColumn = "updated_at";
 const createUserTableQuery = '''CREATE TABLE IF NOT EXISTS "user" (
 	        "id"	INTEGER NOT NULL,
 	        "email"	TEXT NOT NULL UNIQUE,
@@ -301,6 +309,7 @@ const createNoteTableQuery = '''CREATE TABLE  IF NOT EXISTS  "note" (
           "id"	INTEGER NOT NULL,
           "user_id"	INTEGER NOT NULL,
           "text"	TEXT,
+          "updated_at" TEXT,
           FOREIGN KEY("user_id") REFERENCES "user"("id"),
           PRIMARY KEY("id")
           );

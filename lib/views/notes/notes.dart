@@ -50,6 +50,8 @@ class _NoteViewState extends State<NoteView> {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
                         final allNotes = snapshot.data!;
+                        allNotes
+                            .sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
                         return NotesList(
                           notes: allNotes,
                           onDeleteNote: ((note) async {
